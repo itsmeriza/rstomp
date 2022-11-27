@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="12"/>
+    <BuildModes Active="Default"/>
+    <Units>
+      <Unit>
+        <Filename Value="test.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <CursorPos Y="10"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="rstomp.pas"/>
+        <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="48"/>
+        <CursorPos X="62" Y="64"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="C:\fpcupdeluxe\fpcupdeluxe\fpcsrc\rtl\inc\objpash.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="120"/>
+        <CursorPos X="8" Y="134"/>
+        <UsageCount Value="10"/>
+      </Unit>
+    </Units>
+    <JumpHistory HistoryIndex="29">
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="317" Column="3" TopLine="313"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="78" Column="15" TopLine="59"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="348" Column="20" TopLine="344"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="78" Column="14" TopLine="65"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="346" TopLine="343"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="95" Column="19" TopLine="85"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="164" Column="3" TopLine="162"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="107" Column="17" TopLine="81"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="146" Column="3" TopLine="144"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="107" Column="40" TopLine="87"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="149" Column="38" TopLine="146"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="109" Column="28" TopLine="93"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="161" Column="48" TopLine="152"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="107" Column="17" TopLine="95"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="146" Column="3" TopLine="146"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="107" Column="15" TopLine="93"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="146" TopLine="144"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="95" Column="20" TopLine="87"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="168" Column="3" TopLine="166"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="75" Column="19" TopLine="60"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="337" Column="3" TopLine="335"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="73" Column="17" TopLine="61"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="321" Column="3" TopLine="317"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="107" Column="32" TopLine="92"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="159" Column="44" TopLine="147"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="113" Column="48" TopLine="94"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="118" Column="34" TopLine="99"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="154" Column="18" TopLine="146"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="119" Column="29" TopLine="103"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="157" Column="38" TopLine="154"/>
+      </Position>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+</CONFIG>
