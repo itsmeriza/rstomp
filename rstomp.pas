@@ -36,7 +36,7 @@ unit rstomp;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, IdTCPClient, IdThreadComponent, StrUtils;
 
 type
   TRStompCommand = (scSend, scSubscribe, scUnsubscribe, scBegin, scCommit, scAbort,
@@ -52,6 +52,7 @@ type
     fName: string;
     fValue: string;
   public
+    constructor Create(Header: string); overload;
     function GetString(): string;
   published
     property Name: string read fName write fName;
@@ -62,14 +63,15 @@ type
 
   TRStompFrame = class
   private
-    fMsgId: string;
-    fTransactionId: string;
+    fReceipt: string;
+    fRawFrame: string;
   protected
     fBody: string;
     fCommand: TRStompCommand;
     fHeaders: TList;
+    fContentType: string;
 
-    procedure DoAddHeader(Name, Value: string);
+    procedure DoAddHeader(Name, Value: string); overload;
     procedure DoAddHeaders(); virtual;
   public
     constructor Create(Command: TRStompCommand);
@@ -78,22 +80,83 @@ type
     function GetPacket(): string;
     function GetHeaderString: string;
     function GetBody(): string;
+    function GetRawFrame(): string;
+    function GetHeader(HeaderName: string): TRStompHeader;
+		procedure SetRawFrame(Value: string);
+    procedure AddHeader(Name, Value: string); overload;
+    procedure AddHeader(Header: string); overload;
  	published
-    property MsgId: string read fMsgId write fMsgId;
+    property Receipt: string read fReceipt write fReceipt;
   	property Command: TRStompCommand read fCommand write fCommand;
     property Headers: TList read fHeaders write fHeaders;
-    property Body: string read fBody write fBody;
-    property TransactionId: string read fTransactionId write fTransactionId;
+    property Body: string read GetBody write fBody;
+    property ContentType: string read fContentType write fContentType;
+  end;
+
+  { TRStompFrameTransaction }
+
+  TRStompFrameTransaction = class(TRStompFrame)
+  private
+    fTxId: string;
+  protected
+    procedure DoAddHeaders(); override;
+  published
+    property TxId: string read fTxId write fTxId;
   end;
 
   { TRStompFrameSend }
 
-  TRStompFrameSend = class(TRStompFrame)
+  TRStompFrameSend = class(TRStompFrameTransaction)
   private
     fDestination: string;
   public
     constructor Create(Dest: string); reintroduce;
     destructor Destroy; override;
+  end;
+
+  { TRStompFrameAck }
+
+  TRStompFrameAck = class(TRStompFrameTransaction)
+  private
+    fAckId: string;
+  public
+    constructor Create(AckId: string); reintroduce;
+    destructor Destroy; override;
+  published
+    property AckId: string read fAckId;
+  end;
+
+  { TRStompFrameNAck }
+
+  TRStompFrameNAck = class(TRStompFrameTransaction)
+  private
+    fAckId: string;
+  public
+    constructor Create(AckId: string); reintroduce;
+    destructor Destroy(); override;
+  published
+    property AckId: string read fAckId;
+  end;
+
+  { TRStompFrameBegin }
+
+  TRStompFrameBegin = class(TRStompFrameTransaction)
+  public
+    constructor Create(TransactionId: string); reintroduce;
+  end;
+
+  { TRStompFrameCommit }
+
+  TRStompFrameCommit = class(TRStompFrameTransaction)
+  public
+    constructor Create(TransactionId: string); reintroduce;
+  end;
+
+  { TRStompFrameAbort }
+
+  TRStompFrameAbort = class(TRStompFrameTransaction)
+  public
+    constructor Create(TransactionId: string); reintroduce;
   end;
 
   { TRStompFrameSubscribe }
@@ -103,6 +166,8 @@ type
     fSubscriptionId: string;
     fAckType: TRStompAckType;
     fDestination: string;
+  protected
+    procedure DoAddHeaders; override;
   public
     constructor Create(SubscriptionId, Dest: string; AckType: TRStompAckType = atAuto); reintroduce;
     destructor Destroy; override;
@@ -120,6 +185,92 @@ type
     destructor Destroy; override;
   end;
 
+  { TRStompFrameConnect }
+
+  TRStompFrameConnect = class(TRStompFrame)
+  private
+    fHeartBeat: string;
+    fHost: string;
+    fLogin: string;
+    fPasscode: string;
+    fProtocolVersion: string;
+  public
+    constructor Create; reintroduce;
+    destructor Destroy; override;
+  protected
+    procedure DoAddHeaders(); override;
+  published
+    property ProtocolVersion: string read fProtocolVersion write fProtocolVersion;
+    property Host: string read fHost write fHost;
+    property Login: string read fLogin write fLogin;
+    property Passcode: string read fPasscode write fPasscode;
+    property HeartBeat: string read fHeartBeat write fHeartBeat;
+  end;
+
+  { TRStompFrameConnected }
+
+  TRStompFrameConnected = class(TRStompFrame)
+  private
+    function GetSessionID: string;
+    function GetVersion: string;
+  public
+    constructor Create; reintroduce;
+    destructor Destroy; override;
+  published
+    property Version: string read GetVersion;
+    property SessionID: string read GetSessionID;
+  end;
+
+  { TRStompFrameDisconnect }
+
+  TRStompFrameDisconnect = class(TRStompFrame)
+  public
+    constructor Create(); reintroduce;
+    destructor Destroy; override;
+  end;
+
+  { TRStompFrameMessage }
+
+  TRStompFrameMessage = class(TRStompFrame)
+  private
+    function GetAckID: string;
+    function GetDestination: string;
+    function GetMessageID: string;
+    function GetSubscriptionID: string;
+  public
+    constructor Create(); reintroduce;
+    destructor Destroy; override;
+  published
+    property Destination: string read GetDestination;
+    property MessageID: string read GetMessageID;
+    property SubscriptionID: string read GetSubscriptionID;
+    property AckID: string read GetAckID;
+  end;
+
+  { TRStompFrameError }
+
+  TRStompFrameError = class(TRStompFrame)
+  private
+    function GetMsg: string;
+    function GetReceiptID: string;
+  public
+    constructor Create(); reintroduce;
+  published
+    property Msg: string read GetMsg;
+    property ReceiptID: string read GetReceiptID;
+  end;
+
+  { TRStompFrameReceipt }
+
+  TRStompFrameReceipt = class(TRStompFrame)
+  private
+    function GetReceiptID: string;
+  public
+    constructor Create(); reintroduce;
+  published
+    property ReceiptID: string read GetReceiptID;
+  end;
+
   { TRStompUtils }
 
   TRStompUtils = class
@@ -128,9 +279,79 @@ type
     class function Escape(s: string): string;
     class function Unescape(s: string): string;
     class function CreateGUID(): string;
+    class procedure Split(list: TStringList; s: string; delimiter: Char = #10);
   end;
 
+  TRStompReceiveEvent = procedure(Data: string) of object;
+  TRStompRecvParsedEvent = procedure(Frame: TRStompFrame) of object;
+
   TRStomp = class
+  private
+    fConnector: TIdTCPClient;
+    fHeartBeat: string;
+    fLogin: string;
+    fOnRecvConnected: TRStompRecvParsedEvent;
+    fOnRecvError: TRStompRecvParsedEvent;
+    fOnRecvMessage: TRStompRecvParsedEvent;
+    fOnRecvReceipt: TRStompRecvParsedEvent;
+    fPasscode: string;
+    fReceipt: string;
+    fThread: TIdThreadComponent;
+    fHost: string;
+    fOnConnected: TNotifyEvent;
+    fOnDisconnected: TNotifyEvent;
+    fOnReceive: TRStompReceiveEvent;
+    fPort: Word;
+    fVhost: string;
+    fMsg: string;
+
+    procedure DoThreadRunEvent(Sender: TIdThreadComponent);
+    procedure DoConnectorConnected(Sender: TObject);
+    procedure DoConnectorDisconnected(Sender: TObject);
+    procedure DoParseFrame(Frame: TRStompFrame; Raw: string);
+    procedure DoWriteLnConsole();
+    procedure DoSend(Frame: TRStompFrame);
+
+    function CmdConnect(): Boolean;
+    function CmdSend(Dest, Body: string): Boolean;
+    function CmdSubscribe(SubscriptionId, Dest: string; AckType: TRStompAckType): Boolean;
+    function CmdUnsubscribe(SubscriptionId: string): Boolean;
+    function CmdDisconnect(): Boolean;
+    function CmdBeginTx(TxId: string): Boolean;
+    function CmdCommitTx(TxId: string): Boolean;
+    function CmdAbortTx(TxId: string): Boolean;
+    function CmdAck(AckId: string): Boolean;
+    function CmdNAck(AckId: string): Boolean;
+  public
+    constructor Create(Host: string; Port: Word); reintroduce;
+    destructor Destroy; override;
+
+    function Connect(): Boolean;
+    function Disconnect(): Boolean;
+    function Send(Dest, Msg: string): Boolean;
+    function Subscribe(Id, Dest: string; AckType: TRStompAckType = atAuto): Boolean;
+    function Unsubscribe(Id: string): Boolean;
+    function BeginTx(TxId: string): Boolean;
+    function CommitTx(TxId: string): Boolean;
+    function Ack(AckId: string): Boolean;
+    function NAck(AckId: string): Boolean;
+  published
+    property Host: string read fHost;
+    property Port: Word read fPort;
+    property Login: string read fLogin write fLogin;
+    property HeartBeat: string read fHeartBeat write fHeartBeat;
+    property Passcode: string read fPasscode write fPasscode;
+    property Vhost: string read fVhost write fVhost;
+    property Connector: TIdTCPClient read fConnector;
+    property Receipt: string read fReceipt write fReceipt;
+
+    property OnConnected: TNotifyEvent read fOnConnected write fOnConnected;
+    property onDisconnected: TNotifyEvent read fOnDisconnected write fOnDisconnected;
+    property OnReceive: TRStompReceiveEvent read fOnReceive write fOnReceive;
+    property OnRecvConnected: TRStompRecvParsedEvent read fOnRecvConnected write fOnRecvConnected;
+    property OnRecvMessage: TRStompRecvParsedEvent read fOnRecvMessage write fOnRecvMessage;
+    property OnRecvReceipt: TRStompRecvParsedEvent read fOnRecvReceipt write fOnRecvReceipt;
+    property OnRecvError: TRStompRecvParsedEvent read fOnRecvError write fOnRecvError;
   end;
 
 const
@@ -146,13 +367,623 @@ const
 
   ESCAPE_CHARS = ['"', '\', #10, #13, #9, #8, #12, #255];
 
+  PROTOCOL_VERSION = '1.2';
+
 
 implementation
+
+uses IdException;
+
+{ TRStompFrameAbort }
+
+constructor TRStompFrameAbort.Create(TransactionId: string);
+begin
+  inherited Create(scAbort);
+  fTxId:= TransactionId;
+end;
+
+{ TRStompFrameCommit }
+
+constructor TRStompFrameCommit.Create(TransactionId: string);
+begin
+  inherited Create(scCommit);
+  fTxId:= TransactionId;
+end;
+
+{ TRStompFrameBegin }
+
+constructor TRStompFrameBegin.Create(TransactionId: string);
+begin
+  inherited Create(scBegin);
+  fTxId:= TransactionId;
+end;
+
+{ TRStompFrameReceipt }
+
+function TRStompFrameReceipt.GetReceiptID: string;
+var
+  h: TRStompHeader;
+begin
+  h:= GetHeader('receipt-id');
+  if h <> nil then
+  	Result:= h.Value;
+end;
+
+constructor TRStompFrameReceipt.Create;
+begin
+  inherited Create(scReceipt);
+end;
+
+{ TRStompFrameError }
+
+function TRStompFrameError.GetMsg: string;
+var
+  h: TRStompHeader;
+begin
+  h:= GetHeader('message');
+	if h <> nil then
+  	Result:= h.Value;
+end;
+
+function TRStompFrameError.GetReceiptID: string;
+var
+  h: TRStompHeader;
+begin
+  h:= GetHeader('receipt-id');
+	if h <> nil then
+  	Result:= h.Value;
+end;
+
+constructor TRStompFrameError.Create;
+begin
+  inherited Create(scError);
+end;
+
+{ TRStompFrameMessage }
+
+function TRStompFrameMessage.GetAckID: string;
+var
+  h: TRStompHeader;
+begin
+  h:= GetHeader('ack');
+  if h <> nil then
+  	Result:= h.Value;
+end;
+
+function TRStompFrameMessage.GetDestination: string;
+var
+  h: TRStompHeader;
+begin
+  h:= GetHeader('destination');
+  if h <> nil then
+  	Result:= h.Value;
+end;
+
+function TRStompFrameMessage.GetMessageID: string;
+var
+  h: TRStompHeader;
+begin
+  h:= GetHeader('message-id');
+  if h <> nil then
+  	Result:= h.Value;
+end;
+
+function TRStompFrameMessage.GetSubscriptionID: string;
+var
+  h: TRStompHeader;
+begin
+  h:= GetHeader('subscription');
+  if h <> nil then
+  	Result:= h.Value;
+end;
+
+constructor TRStompFrameMessage.Create;
+begin
+  inherited Create(scMessage)
+end;
+
+destructor TRStompFrameMessage.Destroy;
+begin
+  inherited Destroy;
+end;
+
+{ TRStompFrameConnected }
+
+function TRStompFrameConnected.GetVersion: string;
+var
+  h: TRStompHeader;
+begin
+  Result:= '';
+  h:= GetHeader('version');
+  if h <> nil then
+  	Result := h.Value;
+end;
+
+function TRStompFrameConnected.GetSessionID: string;
+var
+  h: TRStompHeader;
+begin
+  Result:= '';
+  h:= GetHeader('session');
+  if h <> nil then
+    Result:= h.Value;
+end;
+
+constructor TRStompFrameConnected.Create;
+begin
+  inherited Create(scConnected);
+end;
+
+destructor TRStompFrameConnected.Destroy;
+begin
+  inherited Destroy;
+end;
+
+{ TRStomp }
+
+procedure TRStomp.DoThreadRunEvent(Sender: TIdThreadComponent);
+var
+  msg, cmd: String;
+  frame: TRStompFrame;
+begin
+  try
+	  msg:= TrimLeft(fConnector.IOHandler.ReadLn(NULL));
+
+    if Assigned(fOnReceive) then
+    begin
+  	  fOnReceive(msg);
+      Exit;
+    end;
+
+    cmd:= Copy(msg, 1, Pos(LF, Msg)-1);
+
+    if Assigned(fOnRecvConnected) and AnsiSameText(cmd, COMMANDS[scConnected]) then
+    begin
+      frame:= TRStompFrameConnected.Create;
+      DoParseFrame(frame, msg);
+      fOnRecvConnected(frame);
+    end
+    else if Assigned(fOnRecvMessage) and AnsiSameText(cmd, COMMANDS[scMessage]) then
+    begin
+      frame:= TRStompFrameMessage.Create();
+      DoParseFrame(frame, msg);
+      fOnRecvMessage(frame);
+    end
+    else if Assigned(fOnRecvReceipt) and AnsiSameText(cmd, COMMANDS[scReceipt]) then
+    begin
+      frame:= TRStompFrameReceipt.Create();
+      DoParseFrame(frame, msg);
+      fOnRecvReceipt(frame);
+    end
+    else if Assigned(fOnRecvError) and AnsiSameText(cmd, COMMANDS[scError]) then
+    begin
+			frame:= TRStompFrameError.Create();
+      DoParseFrame(frame, msg);
+      fOnRecvMessage(frame);
+    end;
+  except
+    on E: Exception do
+    begin
+      fMsg:= E.Message;
+
+      if E is EIdConnClosedGracefully then
+				fMsg:= 'Connection closed.';
+
+      TThread.Queue(nil, @DoWriteLnConsole);
+    end;
+  end;
+end;
+
+procedure TRStomp.DoConnectorConnected(Sender: TObject);
+begin
+  fThread.Active:= True;
+
+  CmdConnect();
+
+	if Assigned(fOnConnected) then
+  	fOnConnected(Sender);
+end;
+
+procedure TRStomp.DoConnectorDisconnected(Sender: TObject);
+begin
+  if Assigned(fOnDisconnected) then
+  	fOnDisconnected(Sender);
+end;
+
+procedure TRStomp.DoParseFrame(Frame: TRStompFrame; Raw: string);
+var
+  list: TStringList;
+  posStart, posEnd: SizeInt;
+  headers, header: String;
+  i: Integer;
+begin
+  Raw:= AnsiReplaceText(Raw, CR, '');
+  posStart:= Pos(EOL, Raw);
+  posEnd:= Pos(EOL+EOL, Raw);
+  headers:= Copy(Raw, posStart+1, posEnd-posStart-1);
+  Frame.Body:= Copy(Raw, posEnd+2, Length(Raw));
+
+  list:= TStringList.Create;
+  try
+  	TRStompUtils.Split(list, headers);
+    frame.Headers.Clear;
+
+    for i := 0 to list.Count-1 do
+    begin
+      header:= list[i];
+      Frame.AddHeader(header);
+    end;
+  finally
+    list.Free;
+  end;
+end;
+
+procedure TRStomp.DoWriteLnConsole;
+begin
+  WriteLn(fMsg);
+end;
+
+procedure TRStomp.DoSend(Frame: TRStompFrame);
+begin
+  fReceipt:= '';
+  fConnector.IOHandler.WriteLn(Frame.GetPacket());
+end;
+
+function TRStomp.CmdConnect: Boolean;
+var
+  f: TRStompFrameConnect;
+begin
+  Result:= True;
+
+	f:= TRStompFrameConnect.Create;
+  try
+    f.ProtocolVersion:= PROTOCOL_VERSION;
+    f.Login:= fLogin;
+    f.Passcode:= fPasscode;
+    f.HeartBeat:= fHeartBeat;
+    f.Host:= fVhost;
+    f.Receipt:= fReceipt;;
+
+    try
+  	  DoSend(f);
+    except
+      Result:= False;
+    end;
+  finally
+    f.Free;
+  end;
+end;
+
+function TRStomp.CmdSend(Dest, Body: string): Boolean;
+var
+  f: TRStompFrameSend;
+begin
+  Result:= True;
+	f := TRStompFrameSend.Create(Dest);
+  f.Body:= Body;
+  f.Receipt:= fReceipt;
+
+  try
+    try
+  		DoSend(f);
+    except
+      Result:= False;
+    end;
+  finally
+    f.Free;
+  end;
+end;
+
+function TRStomp.CmdSubscribe(SubscriptionId, Dest: string;
+  AckType: TRStompAckType): Boolean;
+var
+  f: TRStompFrameSubscribe;
+begin
+  Result:= True;
+	f := TRStompFrameSubscribe.Create(SubscriptionId, Dest, AckType);
+  try
+  	f.Receipt:= fReceipt;
+    try
+    	DoSend(f);
+    except
+    	Result:= False;
+    end;
+  finally
+    f.Free;
+  end;
+end;
+
+function TRStomp.CmdUnsubscribe(SubscriptionId: string): Boolean;
+var
+  f: TRStompFrameUnsubscribe;
+begin
+	f:= TRStompFrameUnsubscribe.Create(SubscriptionId);
+  try
+  	f.Receipt:= fReceipt;
+    try
+      DoSend(f);
+    except
+      Result:= False;
+    end;
+  finally
+    f.Free;
+  end;
+end;
+
+function TRStomp.CmdDisconnect: Boolean;
+var
+  f: TRStompFrameDisconnect;
+begin
+  Result:= True;
+	f:= TRStompFrameDisconnect.Create();
+  try
+    f.Receipt:= fReceipt;
+    try
+    	DoSend(f);
+    except
+      Result:= False;
+    end;
+  finally
+  	f.Free;
+  end;
+end;
+
+function TRStomp.CmdBeginTx(TxId: string): Boolean;
+var
+  f: TRStompFrameBegin;
+begin
+	Result:= True;
+  f:= TRStompFrameBegin.Create(TxId);
+  f.Receipt:= fReceipt;
+  try
+    try
+  		DoSend(f);
+    except
+      Result:= False;
+    end;
+  finally
+    f.Free;
+  end;
+end;
+
+function TRStomp.CmdCommitTx(TxId: string): Boolean;
+var
+  f: TRStompFrameCommit;
+begin
+  Result:= True;
+  f:= TRStompFrameCommit.Create(TxId);
+  try
+  	try
+    	f.Receipt:= fReceipt;
+      DoSend(f);
+    except
+      Result:= False;
+    end;
+  finally
+    f.Free;
+  end;
+end;
+
+function TRStomp.CmdAbortTx(TxId: string): Boolean;
+var
+  f: TRStompFrameAbort;
+begin
+  Result:= True;
+  f:= TRStompFrameAbort.Create(TxId);
+  try
+  	try
+    	f.Receipt:= fReceipt;
+      DoSend(f);
+    except
+      Result:= False;
+    end;
+  finally
+    f.Free;
+  end;
+end;
+
+function TRStomp.CmdAck(AckId: string): Boolean;
+var
+  f: TRStompFrameAck;
+begin
+  Result:= True;
+  f:= TRStompFrameAck.Create(AckId);
+  try
+  	try
+    	f.Receipt:= fReceipt;
+      DoSend(f);
+    except
+      Result:= False;
+    end;
+  finally
+    f.Free;
+  end;
+end;
+
+function TRStomp.CmdNAck(AckId: string): Boolean;
+var
+  f: TRStompFrameNAck;
+begin
+  Result:= True;
+  f:= TRStompFrameNAck.Create(AckId);
+  try
+  	try
+    	f.Receipt:= fReceipt;
+      DoSend(f);
+    except
+      Result:= False;
+    end;
+  finally
+    f.Free;
+  end;
+end;
+
+constructor TRStomp.Create(Host: string; Port: Word);
+begin
+  fHost:= Host;
+  fPort:= Port;
+
+  fThread:= TIdThreadComponent.Create(nil);
+  fThread.Loop:= True;
+  fThread.OnRun:= @DoThreadRunEvent;
+
+  fConnector:= TIdTCPClient.Create(nil);
+  fConnector.OnConnected:= @DoConnectorConnected;
+  fConnector.OnDisconnected:= @DoConnectorDisconnected;
+end;
+
+destructor TRStomp.Destroy;
+begin
+  if fThread.Active then
+  	fThread.Active:= False;
+  fThread.Free;
+
+  fConnector.Free;
+  inherited Destroy;
+end;
+
+function TRStomp.Connect: Boolean;
+begin
+  Result:= True;
+  try
+  	fConnector.Connect(fHost, fPort);
+  except
+    Result:= False;
+  end;
+end;
+
+function TRStomp.Disconnect: Boolean;
+begin
+  Result:= CmdDisconnect();
+end;
+
+function TRStomp.Send(Dest, Msg: string): Boolean;
+begin
+  Result:= CmdSend(Dest, Msg);
+end;
+
+function TRStomp.Subscribe(Id, Dest: string; AckType: TRStompAckType): Boolean;
+begin
+  Result:= CmdSubscribe(Id, Dest, AckType);
+end;
+
+function TRStomp.Unsubscribe(Id: string): Boolean;
+begin
+  Result:= CmdUnsubscribe(Id);
+end;
+
+function TRStomp.BeginTx(TxId: string): Boolean;
+begin
+  Result:= CmdBeginTx(TxId);
+end;
+
+function TRStomp.CommitTx(TxId: string): Boolean;
+begin
+  Result:= CmdCommitTx(TxId);
+end;
+
+function TRStomp.Ack(AckId: string): Boolean;
+begin
+  Result:= CmdAck(AckId);
+end;
+
+function TRStomp.NAck(AckId: string): Boolean;
+begin
+  Result:= CmdNAck(AckId);
+end;
+
+{ TRStompFrameConnect }
+
+constructor TRStompFrameConnect.Create;
+begin
+  inherited Create(scConnect);
+end;
+
+destructor TRStompFrameConnect.Destroy;
+begin
+  inherited Destroy;
+end;
+
+procedure TRStompFrameConnect.DoAddHeaders;
+begin
+  inherited DoAddHeaders;
+
+  if fProtocolVersion = '' then
+  	raise Exception.Create('Protocol version must be defined.');
+
+  DoAddHeader('accept-version', fProtocolVersion);
+
+  if fHost = '' then
+    raise Exception.Create('Host is required and can''t be blank.');
+
+  DoAddHeader('host', fHost);
+
+  if fLogin <> '' then
+  	DoAddHeader('login', fLogin);
+
+  if fPasscode <> '' then
+  	DoAddHeader('passcode', fPasscode);
+
+  if fHeartBeat <> '' then
+  	DoAddHeader('heart-beat', fHeartBeat);
+end;
+
+{ TRStompFrameDisconnect }
+
+constructor TRStompFrameDisconnect.Create;
+begin
+  inherited Create(scDisconnect);
+end;
+
+destructor TRStompFrameDisconnect.Destroy;
+begin
+  inherited Destroy;
+end;
+
+{ TRStompFrameNAck }
+
+constructor TRStompFrameNAck.Create(AckId: string);
+begin
+  inherited Create(scNAck);
+  fAckId:= AckId;
+  DoAddHeader('id', fAckId);
+end;
+
+destructor TRStompFrameNAck.Destroy;
+begin
+  inherited Destroy;
+end;
+
+{ TRStompFrameAck }
+
+constructor TRStompFrameAck.Create(AckId: string);
+begin
+  inherited Create(scAck);
+  fAckId:= AckId;
+  DoAddHeader('id', fAckId);
+end;
+
+destructor TRStompFrameAck.Destroy;
+begin
+  inherited Destroy;
+end;
+
+{ TRStompFrameTransaction }
+
+procedure TRStompFrameTransaction.DoAddHeaders;
+begin
+  inherited DoAddHeaders();
+
+  if fTxId <> '' then
+  	DoAddHeader('transaction', fTxId);
+end;
 
 { TRStompFrameUnsubscribe }
 
 constructor TRStompFrameUnsubscribe.Create(SubscriptionId: string);
 begin
+  inherited Create(scUnsubscribe);
+
   fSubscriptionId:= SubscriptionId;
   DoAddHeader('id', fSubscriptionId);
 end;
@@ -163,6 +994,14 @@ begin
 end;
 
 { TRStompFrameSubscribe }
+
+procedure TRStompFrameSubscribe.DoAddHeaders;
+begin
+  inherited DoAddHeaders;
+
+  if (fAckType = atClient) or (fAckType = atIndividual) then
+  	DoAddHeader('ack', ACK_TYPES[fAckType]);
+end;
 
 constructor TRStompFrameSubscribe.Create(SubscriptionId, Dest: string;
   AckType: TRStompAckType);
@@ -325,6 +1164,57 @@ begin
 		Result:= GUIDToString(guid).Replace('-', '');
 end;
 
+class procedure TRStompUtils.Split(list: TStringList; s: string; delimiter: Char
+  );
+var
+  i, len, p, pClosed: Integer;
+  closed, found: Boolean;
+  c: Char;
+  left, right: string;
+begin
+  right := s;
+  len := Length(right);
+  if len = 0 then
+    Exit;
+
+  if PChar(right)[len-1] <> delimiter then
+    right := right + delimiter;
+
+  closed := True;
+  found := False;
+  pClosed := 0;
+  len := Length(right);
+  for i := 0 to len - 1 do
+  begin
+    c := PChar(right)[i];
+    if c = '"' then
+    begin
+      closed := not closed;
+      if closed then
+        pClosed := i+1
+    end;
+
+    if (c = delimiter) and closed then
+    begin
+      if not found then
+        p := Pos(delimiter, right)
+      else begin
+        p := pClosed+1;
+      end;
+
+      left := Trim(Copy(right, 1, p-1));
+      list.Add(left);
+
+      right := Copy(right, p+1, len);
+      Split(list, right, delimiter);
+
+      Break;
+    end
+    else if (c = delimiter) and not closed then
+      found := True;
+  end;
+end;
+
 { TRStompFrame }
 
 procedure TRStompFrame.DoAddHeader(Name, Value: string);
@@ -344,22 +1234,19 @@ begin
   len:= Length(fBody);
   if len > 0 then
   begin
-    DoAddHeader('content-type', 'text/plain');
+    DoAddHeader('content-type', fContentType);
   	DoAddHeader('content-length', IntToStr(len));
   end;
 
-  if fTransactionId <> '' then
-  	DoAddHeader('transaction', fTransactionId);
-
-  if fMsgId <> '' then
-  	DoAddHeader('receipt', fMsgId);
+  if fReceipt <> '' then
+  	DoAddHeader('receipt', fReceipt);
 end;
 
 constructor TRStompFrame.Create(Command: TRStompCommand);
 begin
   fCommand:= Command;
-  fMsgId:= MsgId;
   fHeaders:= TList.Create;
+  fContentType:= 'text/plain';
 end;
 
 destructor TRStompFrame.Destroy;
@@ -370,7 +1257,8 @@ end;
 
 function TRStompFrame.GetPacket: string;
 begin
-	DoAddHeaders();
+  if not (fCommand in [scConnected, scMessage, scError, scReceipt]) then
+		DoAddHeaders();
 
   {
   	STOMP frame follow this following structure:
@@ -395,7 +1283,7 @@ var
   h: TRStompHeader;
 begin
   Result:= '';
-	for i:= 0 to fHeaders.Count do
+	for i:= 0 to fHeaders.Count-1 do
   begin
   	h:= TRStompHeader(fHeaders[i]);
     Result:= Result + h.GetString();
@@ -407,7 +1295,56 @@ begin
   Result := fBody;
 end;
 
+function TRStompFrame.GetRawFrame: string;
+begin
+  Result:= fRawFrame;;
+end;
+
+function TRStompFrame.GetHeader(HeaderName: string): TRStompHeader;
+var
+  i: Integer;
+  h: TRStompHeader;
+begin
+  Result:= nil;
+  for i := 0 to fHeaders.Count-1 do
+  begin
+  	h:= TRStompHeader(fHeaders[i]);
+    if AnsiSameText(HeaderName, h.Name) then
+    begin
+      Result := h;
+      Exit;
+    end;
+  end;
+end;
+
+procedure TRStompFrame.SetRawFrame(Value: string);
+begin
+  fRawFrame:= Value;;
+end;
+
+procedure TRStompFrame.AddHeader(Name, Value: string);
+begin
+  DoAddHeader(Name, Value);
+end;
+
+procedure TRStompFrame.AddHeader(Header: string);
+var
+  h: TRStompHeader;
+begin
+	h:= TRStompHeader.Create(Header);
+  fHeaders.Add(h);
+end;
+
 { TRStompHeader }
+
+constructor TRStompHeader.Create(Header: string);
+var
+  p: SizeInt;
+begin
+  p:= Pos(':', Header);
+	fName:= Copy(Header, 1, p-1);
+  fValue:= Copy(Header, p+1, Length(Header));
+end;
 
 function TRStompHeader.GetString: string;
 begin

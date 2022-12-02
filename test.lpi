@@ -43,8 +43,14 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
+      <OtherUnitFiles Value="C:\fpcupdeluxe\fpcupdeluxe\lazarus\components\Indy10_5518\Lib\Core\;C:\fpcupdeluxe\fpcupdeluxe\lazarus\components\Indy10_5518\Lib\System\"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
+    <Linking>
+      <Debugging>
+        <DebugInfoType Value="dsDwarf2Set"/>
+      </Debugging>
+    </Linking>
   </CompilerOptions>
   <Debugging>
     <Exceptions>
