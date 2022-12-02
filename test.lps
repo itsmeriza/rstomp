@@ -9,8 +9,8 @@
         <Filename Value="test.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="42"/>
-        <CursorPos X="32" Y="60"/>
+        <TopLine Value="9"/>
+        <CursorPos X="50" Y="51"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
       </Unit>
@@ -18,8 +18,8 @@
         <Filename Value="rstomp.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="880"/>
-        <CursorPos X="95" Y="898"/>
+        <TopLine Value="751"/>
+        <CursorPos X="72" Y="903"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
       </Unit>
@@ -28,14 +28,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="201"/>
         <CursorPos X="15" Y="215"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit>
       <Unit>
         <Filename Value="C:\fpcupdeluxe\fpcupdeluxe\lazarus\components\Indy10_5518\Lib\Core\IdThreadComponent.pas"/>
         <EditorIndex Value="4"/>
         <TopLine Value="505"/>
         <CursorPos Y="519"/>
-        <UsageCount Value="60"/>
+        <UsageCount Value="61"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -50,7 +50,7 @@
         <EditorIndex Value="3"/>
         <TopLine Value="920"/>
         <CursorPos X="75" Y="935"/>
-        <UsageCount Value="31"/>
+        <UsageCount Value="32"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -58,7 +58,7 @@
         <EditorIndex Value="2"/>
         <TopLine Value="2185"/>
         <CursorPos Y="2198"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
         <Loaded Value="True"/>
       </Unit>
     </Units>
