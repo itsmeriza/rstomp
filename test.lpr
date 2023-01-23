@@ -34,10 +34,8 @@ type
  end;
 
 var
-  stomp: TRStomp;
   i: Integer;
-  useSSL: Boolean;
-  pub, subsc1, subsc2: TRStomp;
+  pub1, pub2, subsc1, subsc2: TRStomp;
 
 { TEventSub1 }
 
@@ -117,11 +115,17 @@ const
 begin
  try
     WriteLn('*** Test publish/subscribe pattern *******************************');
-    pub:= TRStomp.Create('192.168.28.2', PORT);
-    pub.Login:= 'dev';
-    pub.Passcode:= 'dev123';
-    pub.Vhost:= '/';
-    pub.Connect();
+    pub1:= TRStomp.Create('192.168.28.2', PORT);
+    pub1.Login:= 'dev';
+    pub1.Passcode:= 'dev123';
+    pub1.Vhost:= '/';
+    pub1.Connect();
+
+    pub2:= TRStomp.Create('192.168.28.2', PORT);
+    pub2.Login:= 'dev';
+    pub2.Passcode:= 'dev123';
+    pub2.Vhost:= '/';
+    pub2.Connect();
 
     subsc1:= TRStomp.Create('192.168.28.2', PORT);
     subsc1.Login:= 'dev';
@@ -147,16 +151,15 @@ begin
     subsc2.Subscribe('sub-2', '/topic/pub');
 
     Sleep(2000);
-    WriteLn('Publisher send 1 message.');
-    pub.Send('/topic/pub', 'Ini adalah pesan pertama.');
-    WriteLn('Publisher send 1 message.');
-    pub.Send('/topic/pub', 'Ini adalah pesan kedua.');
-    WriteLn('Publisher send 1 message.');
-    pub.Send('/topic/pub', 'Ini adalah pesan ketiga.');
+    WriteLn('Publisher 1 send 1 message.');
+    pub1.Send('/topic/pub', 'this is first message.');
+    WriteLn('Publisher 1 send 1 message.');
+    pub1.Send('/topic/pub', 'this is second message.');
+    WriteLn('Publisher 1 send 1 message.');
+    pub1.Send('/topic/pub', 'this is third message.');
 
-    //Sleep(2000);
-    //subsc1.Subscribe('sub-1', '/exchange/*apple.*');
-    //subsc2.Subscribe('sub-2', '/exchange/*orange*');
+    WriteLn('Publisher 2 send 1 message.');
+    pub2.Send('/topic/pub', 'this is first message sent by published 2.');
 
     Readln;
   except

@@ -8,18 +8,18 @@
       <Unit>
         <Filename Value="test.lpr"/>
         <IsPartOfProject Value="True"/>
-        <TopLine Value="134"/>
-        <CursorPos X="62" Y="157"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="141"/>
+        <CursorPos X="84" Y="161"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="rstomp.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="358"/>
-        <CursorPos X="17" Y="375"/>
+        <TopLine Value="368"/>
+        <CursorPos X="83" Y="381"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
       </Unit>
@@ -46,7 +46,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit>
     </Units>
-    <JumpHistory HistoryIndex="13">
+    <JumpHistory HistoryIndex="16">
       <Position>
         <Filename Value="rstomp.pas"/>
         <Caret Line="693" Column="50" TopLine="673"/>
@@ -102,6 +102,18 @@
       <Position>
         <Filename Value="rstomp.pas"/>
         <Caret Line="39" Column="62" TopLine="71"/>
+      </Position>
+      <Position>
+        <Filename Value="test.lpr"/>
+        <Caret Line="38" Column="13" TopLine="25"/>
+      </Position>
+      <Position>
+        <Filename Value="test.lpr"/>
+        <Caret Line="122" Column="9" TopLine="104"/>
+      </Position>
+      <Position>
+        <Filename Value="test.lpr"/>
+        <Caret Line="149" Column="9" TopLine="135"/>
       </Position>
     </JumpHistory>
     <RunParams>
