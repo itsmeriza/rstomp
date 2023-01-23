@@ -1,6 +1,6 @@
 program test;
 
-uses Classes, SysUtils, rstomp;
+uses Classes, SysUtils, rstomp, IdSSLOpenSSL;
 
 type
 
@@ -13,12 +13,79 @@ type
     class procedure RecvErrorHandler(Frame: TRStompFrame);
   end;
 
-const
-  PORT = 61613;
+ { TEventPub }
+
+ { TEventSub1 }
+
+ TEventSub1 = class
+    class procedure RecvConnectedHandler(Frame: TRStompFrame);
+    class procedure RecvMessageHandler(Frame: TRStompFrame);
+    class procedure RecvReceiptHandler(Frame: TRStompFrame);
+    class procedure RecvErrorHandler(Frame: TRStompFrame);
+ end;
+
+  { TEventSub2 }
+
+  TEventSub2 = class
+    class procedure RecvConnectedHandler(Frame: TRStompFrame);
+    class procedure RecvMessageHandler(Frame: TRStompFrame);
+    class procedure RecvReceiptHandler(Frame: TRStompFrame);
+    class procedure RecvErrorHandler(Frame: TRStompFrame);
+ end;
 
 var
   stomp: TRStomp;
   i: Integer;
+  useSSL: Boolean;
+  pub, subsc1, subsc2: TRStomp;
+
+{ TEventSub1 }
+
+class procedure TEventSub1.RecvConnectedHandler(Frame: TRStompFrame);
+begin
+  WriteLn('');
+  WriteLn('<<< Subsc 1 <<< ', frame.GetPacket());
+  WriteLn();
+end;
+
+class procedure TEventSub1.RecvMessageHandler(Frame: TRStompFrame);
+begin
+	TEventSub1.RecvConnectedHandler(Frame);
+end;
+
+class procedure TEventSub1.RecvReceiptHandler(Frame: TRStompFrame);
+begin
+  TEventSub1.RecvConnectedHandler(Frame);
+end;
+
+class procedure TEventSub1.RecvErrorHandler(Frame: TRStompFrame);
+begin
+  TEventSub1.RecvConnectedHandler(Frame);
+end;
+
+{ TEventSub2 }
+
+class procedure TEventSub2.RecvConnectedHandler(Frame: TRStompFrame);
+begin
+  WriteLn('');
+  WriteLn('<<< Subsc 2 <<< ', frame.GetPacket());
+  WriteLn();
+end;
+
+class procedure TEventSub2.RecvMessageHandler(Frame: TRStompFrame);
+begin
+	TEventSub2.RecvConnectedHandler(Frame);
+end;
+
+class procedure TEventSub2.RecvReceiptHandler(Frame: TRStompFrame);
+begin
+  TEventSub2.RecvConnectedHandler(Frame);
+end;
+
+class procedure TEventSub2.RecvErrorHandler(Frame: TRStompFrame);
+begin
+	TEventSub2.RecvConnectedHandler(Frame);
+end;
 
 { TEvent }
 
@@ -44,65 +111,59 @@ begin
   RecvConnectedHandler(Frame);
 end;
 
+const
+  PORT = 61613;
+
 begin
-	stomp:= TRStomp.Create('192.168.28.2', PORT);
-  stomp.Login:= 'dev';
-  stomp.Passcode:= 'dev123';
-  stomp.Vhost:= '/';
-  stomp.OnRecvConnected:= @TEvent.RecvConnectedHandler;
-  stomp.OnRecvMessage:= @TEvent.RecvMessageHandler;
-  stomp.OnRecvReceipt:= @TEvent.RecvReceiptHandler;
-  stomp.OnRecvError:= @TEvent.RecvErrorHandler;
-  if stomp.Connect() then
-  	WriteLn('Connection to server established.')
-  else
-    WriteLn('Connecting error.');
+ try
+    WriteLn('*** Test publish/subscribe pattern *******************************');
+    pub:= TRStomp.Create('192.168.28.2', PORT);
+    pub.Login:= 'dev';
+    pub.Passcode:= 'dev123';
+    pub.Vhost:= '/';
+    pub.Connect();
 
-  WriteLn('Subscribe the /topic/test.');
-  stomp.Receipt:= 'msg-0000';
-  stomp.Subscribe('sub-01', '/topic/test');
+    subsc1:= TRStomp.Create('192.168.28.2', PORT);
+    subsc1.Login:= 'dev';
+    subsc1.Passcode:= 'dev123';
+    subsc1.Vhost:= '/';
+    subsc1.OnRecvConnected:= @TEventSub1.RecvConnectedHandler;
+    subsc1.OnRecvMessage:= @TEventSub1.RecvMessageHandler;
+    subsc1.OnRecvReceipt:= @TEventSub1.RecvReceiptHandler;
+    subsc1.OnRecvError:= @TEventSub1.RecvErrorHandler;
+    subsc1.Connect();
 
-  // send message to /topic/test.
-  WriteLn('Send first message to /topic/test.');
-  stomp.Send('/topic/test', 'Hello world!');
+    subsc2:= TRStomp.Create('192.168.28.2', PORT);
+    subsc2.Login:= 'dev';
+    subsc2.Passcode:= 'dev123';
+    subsc2.Vhost:= '/';
+    subsc2.OnRecvConnected:= @TEventSub2.RecvConnectedHandler;
+    subsc2.OnRecvMessage:= @TEventSub2.RecvMessageHandler;
+    subsc2.OnRecvReceipt:= @TEventSub2.RecvReceiptHandler;
+    subsc2.OnRecvError:= @TEventSub2.RecvErrorHandler;
+    subsc2.Connect();
 
-  // send second message to /topic/test.
-  WriteLn('Send second message to /topic/test.');
-  stomp.Send('/topic/test', 'This is the second message from client.');
+    subsc1.Subscribe('sub-1', '/topic/pub');
+    subsc2.Subscribe('sub-2', '/topic/pub');
 
-  for i := 0 to 4 do
-  begin
-  	WriteLn('Send the other 9 messages to /topic/test.');
-    stomp.Send('/topic/test', 'This is the ' + IntToStr(i+1) + ' of other message from client.');
+    Sleep(2000);
+    WriteLn('Publisher send 1 message.');
+    pub.Send('/topic/pub', 'Ini adalah pesan pertama.');
+    WriteLn('Publisher send 1 message.');
+    pub.Send('/topic/pub', 'Ini adalah pesan kedua.');
+    WriteLn('Publisher send 1 message.');
+    pub.Send('/topic/pub', 'Ini adalah pesan ketiga.');
+
+    //Sleep(2000);
+    //subsc1.Subscribe('sub-1', '/exchange/*apple.*');
+    //subsc2.Subscribe('sub-2', '/exchange/*orange*');
+
+    Readln;
+  except
+    on E: Exception do
+    begin
+    	WriteLn('Connecting error with message: ', E.Message);
+    end;
   end;
-
-  // unsubscribe topic.
-  //WriteLn('Unsubscribe topic.');
-  //stomp.Unsubscribe('sub-01');
-
-  // send receipt frame.
-  WriteLn('Send frame with receipt header.');
-  stomp.Receipt:= 'msg-00001';
-  stomp.Send('/topic/test', 'This message sent with receipt header.');
-
-  // begin transaction.
-  WriteLn('Begin transaction testing. Send BEGIN frame.');
-  stomp.Receipt:= 'msg-00002';
-  stomp.BeginTx('Tx-001');
-
-  // commit trasaction.
-  WriteLn('Commit transaction testing. Send COMMIT frame');
-  stomp.Receipt:= 'msg-00003';
-  stomp.CommitTx('Tx-001');
-
-  WriteLn('Ack with receipt testing.');
-  stomp.Receipt:= 'msg-00004';
-  stomp.Ack('01');
-
-  WriteLn('NAck with receipt testing.');
-  stomp.Receipt:= 'msg-00005';
-  stomp.NAck('01');
-
-  Readln;
 end.
 

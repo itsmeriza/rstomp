@@ -43,7 +43,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="C:\fpcupdeluxe\fpcupdeluxe\lazarus\components\Indy10_5518\Lib\Core\;C:\fpcupdeluxe\fpcupdeluxe\lazarus\components\Indy10_5518\Lib\System\"/>
+      <OtherUnitFiles Value="C:\fpcupdeluxe\fpcupdeluxe\lazarus\components\Indy10_5518\Lib\Core\;C:\fpcupdeluxe\fpcupdeluxe\lazarus\components\Indy10_5518\Lib\System\;C:\fpcupdeluxe\fpcupdeluxe\lazarus\components\Indy10_5518\Lib\Protocols\"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Linking>
