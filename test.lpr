@@ -147,19 +147,28 @@ begin
     subsc2.OnRecvError:= @TEventSub2.RecvErrorHandler;
     subsc2.Connect();
 
-    subsc1.Subscribe('sub-1', '/topic/pub');
-    subsc2.Subscribe('sub-2', '/topic/pub');
+    subsc1.Subscribe('sub-1', '/topic/sub1');
+    subsc1.Subscribe('sub-2', '/topic/sub1');
 
     Sleep(2000);
-    WriteLn('Publisher 1 send 1 message.');
-    pub1.Send('/topic/pub', 'this is first message.');
-    WriteLn('Publisher 1 send 1 message.');
-    pub1.Send('/topic/pub', 'this is second message.');
-    WriteLn('Publisher 1 send 1 message.');
-    pub1.Send('/topic/pub', 'this is third message.');
+    pub1.Send('/topic/sub1', 'HELLO');
 
-    WriteLn('Publisher 2 send 1 message.');
-    pub2.Send('/topic/pub', 'this is first message sent by published 2.');
+    //subsc1.Subscribe('sub-1', '/topic/pub');
+    //subsc1.Subscribe('sub-2', '/topic/pub-2');
+    //subsc2.Subscribe('sub-2', '/topic/pub');
+
+    //Sleep(2000);
+    //WriteLn('Publisher 1 send 1 message.');
+    //pub1.Send('/topic/pub', 'this is first message.');
+    //WriteLn('Publisher 1 send 1 message.');
+    //pub1.Send('/topic/pub', 'this is second message.');
+    //WriteLn('Publisher 1 send 1 message.');
+    //pub1.Send('/topic/pub', 'this is third message.');
+    //
+    //
+    //
+    //WriteLn('Publisher 2 send 1 message.');
+    //subsc1.Send('/topic/pub-2', 'this is first message sent by published 2.');
 
     Readln;
   except
