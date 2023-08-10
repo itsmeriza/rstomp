@@ -82,6 +82,7 @@ type
     function GetBody(): string;
     function GetRawFrame(): string;
     function GetHeader(HeaderName: string): TRStompHeader;
+    function GetAckId(): string;
 		procedure SetRawFrame(Value: string);
     procedure AddHeader(Name, Value: string); overload;
     procedure AddHeader(Header: string); overload;
@@ -304,6 +305,7 @@ type
     fPort: Word;
     fVhost: string;
     fMsg: string;
+    fAckId: string;
 
     procedure DoThreadRunEvent(Sender: TIdThreadComponent);
     procedure DoConnectorConnected(Sender: TObject);
@@ -333,8 +335,8 @@ type
     function Unsubscribe(Id: string): Boolean;
     function BeginTx(TxId: string): Boolean;
     function CommitTx(TxId: string): Boolean;
-    function Ack(AckId: string): Boolean;
-    function NAck(AckId: string): Boolean;
+    function Ack(): Boolean;
+    function NAck(): Boolean;
   published
     property Host: string read fHost;
     property Port: Word read fPort;
@@ -344,6 +346,7 @@ type
     property Vhost: string read fVhost write fVhost;
     property Connector: TIdTCPClient read fConnector;
     property Receipt: string read fReceipt write fReceipt;
+    property AckId: string read fAckId;
 
     property OnConnected: TNotifyEvent read fOnConnected write fOnConnected;
     property onDisconnected: TNotifyEvent read fOnDisconnected write fOnDisconnected;
@@ -527,49 +530,57 @@ var
   frame: TRStompFrame;
 begin
   try
-	  msg:= TrimLeft(fConnector.IOHandler.ReadLn(NULL));
+    try
+	    msg:= TrimLeft(fConnector.IOHandler.ReadLn(NULL));
 
-    if Assigned(fOnReceive) then
-    begin
-  	  fOnReceive(msg);
-      Exit;
+      if Assigned(fOnReceive) then
+      begin
+  	    fOnReceive(msg);
+        Exit;
+      end;
+
+      cmd:= Copy(msg, 1, Pos(LF, Msg)-1);
+
+      if Assigned(fOnRecvConnected) and AnsiSameText(cmd, COMMANDS[scConnected]) then
+      begin
+        frame:= TRStompFrameConnected.Create;
+        DoParseFrame(frame, msg);
+        fOnRecvConnected(frame);
+      end
+      else if Assigned(fOnRecvMessage) and AnsiSameText(cmd, COMMANDS[scMessage]) then
+      begin
+        frame:= TRStompFrameMessage.Create();
+        DoParseFrame(frame, msg);
+        fOnRecvMessage(frame);
+      end
+      else if Assigned(fOnRecvReceipt) and AnsiSameText(cmd, COMMANDS[scReceipt]) then
+      begin
+        frame:= TRStompFrameReceipt.Create();
+        DoParseFrame(frame, msg);
+        fOnRecvReceipt(frame);
+      end
+      else if Assigned(fOnRecvError) and AnsiSameText(cmd, COMMANDS[scError]) then
+      begin
+			  frame:= TRStompFrameError.Create();
+        DoParseFrame(frame, msg);
+        fOnRecvMessage(frame);
+      end;
+    except
+      on E: Exception do
+      begin
+        fMsg:= E.Message;
+
+        if E is EIdConnClosedGracefully then
+				  fMsg:= 'Connection closed.';
+
+        TThread.Queue(nil, @DoWriteLnConsole);
+      end;
     end;
-
-    cmd:= Copy(msg, 1, Pos(LF, Msg)-1);
-
-    if Assigned(fOnRecvConnected) and AnsiSameText(cmd, COMMANDS[scConnected]) then
+  finally
+    if frame <> nil then
     begin
-      frame:= TRStompFrameConnected.Create;
-      DoParseFrame(frame, msg);
-      fOnRecvConnected(frame);
-    end
-    else if Assigned(fOnRecvMessage) and AnsiSameText(cmd, COMMANDS[scMessage]) then
-    begin
-      frame:= TRStompFrameMessage.Create();
-      DoParseFrame(frame, msg);
-      fOnRecvMessage(frame);
-    end
-    else if Assigned(fOnRecvReceipt) and AnsiSameText(cmd, COMMANDS[scReceipt]) then
-    begin
-      frame:= TRStompFrameReceipt.Create();
-      DoParseFrame(frame, msg);
-      fOnRecvReceipt(frame);
-    end
-    else if Assigned(fOnRecvError) and AnsiSameText(cmd, COMMANDS[scError]) then
-    begin
-			frame:= TRStompFrameError.Create();
-      DoParseFrame(frame, msg);
-      fOnRecvMessage(frame);
-    end;
-  except
-    on E: Exception do
-    begin
-      fMsg:= E.Message;
-
-      if E is EIdConnClosedGracefully then
-				fMsg:= 'Connection closed.';
-
-      TThread.Queue(nil, @DoWriteLnConsole);
+      fAckId:= frame.GetAckId();
+    	frame.Free;
     end;
   end;
 end;
@@ -882,14 +893,22 @@ begin
   Result:= CmdCommitTx(TxId);
 end;
 
-function TRStomp.Ack(AckId: string): Boolean;
+function TRStomp.Ack: Boolean;
 begin
-  Result:= CmdAck(AckId);
+  Result:= False;
+  if fAckId = '' then
+  	Exit;
+
+  Result:= CmdAck(fAckId);
 end;
 
-function TRStomp.NAck(AckId: string): Boolean;
+function TRStomp.NAck: Boolean;
 begin
-  Result:= CmdNAck(AckId);
+	Result:= False;
+  if fAckId = '' then
+  	Exit;
+
+  Result:= CmdNAck(fAckId);
 end;
 
 { TRStompFrameConnect }
@@ -1315,6 +1334,19 @@ begin
       Exit;
     end;
   end;
+end;
+
+function TRStompFrame.GetAckId: string;
+var
+  h: TRStompHeader;
+begin
+  Result:= '';
+
+  h:= GetHeader('ack');
+  if h = nil then
+  	Exit;
+
+  Result:= h.Value;
 end;
 
 procedure TRStompFrame.SetRawFrame(Value: string);

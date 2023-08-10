@@ -46,8 +46,12 @@ begin
   WriteLn();
 end;
 
+var
+	ackId_1: string;
+
 class procedure TEventSub1.RecvMessageHandler(Frame: TRStompFrame);
 begin
+  WriteLn('Ack id: ', Frame.GetAckId());
 	TEventSub1.RecvConnectedHandler(Frame);
 end;
 
@@ -148,10 +152,25 @@ begin
     subsc2.Connect();
 
     subsc1.Subscribe('sub-1', '/topic/sub1');
-    subsc1.Subscribe('sub-2', '/topic/sub1');
+    subsc2.Subscribe('sub-2', '/topic/sub1');
 
     Sleep(2000);
     pub1.Send('/topic/sub1', 'HELLO');
+    //pub1.Send('/topic/sub2', 'HELLO');
+
+
+    Sleep(2000);
+    WriteLn;
+    WriteLn('*********** Queue Testing ***********');
+    WriteLn;
+
+    subsc1.Subscribe('sub-1-q', '/queue/sub1', TRStompAckType.atClient);
+
+    Sleep(2000);
+    pub1.Send('/queue/sub1', 'astalavista!');
+
+    Sleep(2000);
+    subsc1.Ack();
 
     //subsc1.Subscribe('sub-1', '/topic/pub');
     //subsc1.Subscribe('sub-2', '/topic/pub-2');
