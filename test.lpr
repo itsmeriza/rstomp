@@ -271,9 +271,7 @@ end;
 
 procedure DoMultithreadSendTest();
 var
-  node: TRStomp;
   th1, th2: TIdThreadComponent;
-  data: RDataSendWait;
 begin
   WriteLn();
   WriteLn('*********** Multi threading reponse waiting Test Begin ************');
