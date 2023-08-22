@@ -673,10 +673,15 @@ begin
   raw:= '';
   tick:= GetTickCount64();
   timeout:= 0;
-  while (cmd <> 'MESSAGE') and (timeout < REQUEST_TIMEOUT) do
+  while ((cmd <> 'MESSAGE') or (cmd <> 'ERROR')) and (timeout < REQUEST_TIMEOUT) do
   begin
 		raw:= TrimLeft(fConnector.IOHandler.ReadLn(NULL));
     cmd:= Copy(raw, 1, Pos(LF, raw)-1);
+    if cmd = 'MESSAGE' then
+      Break
+    else if cmd = 'ERROR' then
+    	raise Exception.Create('Error response from server.');
+
     timeout:= GetTickCount64() - tick;
   end;
 
@@ -742,6 +747,7 @@ begin
   	cs.Release;
   end;
 
+  Connect();
   Subscribe(SubscriptionId, Listener);
 
   f:= TRStompFrameSend.Create(Destination);

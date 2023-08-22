@@ -1,6 +1,6 @@
 program test;
 
-uses Classes, SysUtils, rstomp, IdSSLOpenSSL;
+uses Classes, SysUtils, rstomp, IdSSLOpenSSL, IdThreadComponent;
 
 type
 
@@ -13,7 +13,12 @@ type
     class procedure RecvErrorHandler(Frame: TRStompFrame);
   end;
 
- { TEventPub }
+ { TThreadProc }
+
+ TThreadProc = class
+    class procedure Thread1Proc(Sender: TIdThreadComponent);
+    class procedure Thread2Proc(Sender: TIdThreadComponent);
+ end;
 
  { TEventSub1 }
 
@@ -33,8 +38,75 @@ type
     class procedure RecvErrorHandler(Frame: TRStompFrame);
  end;
 
+const
+  BROKER_ADDRESS = '192.168.28.2';
+  BROKER_PORT = 61613;
+  BROKER_VHOST = '/';
+  BROKER_USER = 'dev';
+  BROKER_PASSWD = 'dev123';
+
+  PATH_TOPIC_3 = '/topic/node3';
+  PATH_QUEUE_2 = '/queue/node2';
+  PATH_QUEUE_3 = '/queue/node3';
+
 var
   i: Integer;
+
+{ TThreadProc }
+
+class procedure TThreadProc.Thread1Proc(Sender: TIdThreadComponent);
+var
+	node: TRStomp;
+  data: RDataSendWait;
+  response: String;
+begin
+  node:= TRStomp.Create(BROKER_ADDRESS, BROKER_PORT);
+  node.Login:= BROKER_USER;
+  node.Passcode:= BROKER_PASSWD;
+  node.Vhost:= BROKER_VHOST;
+
+  data.Destination:= PATH_QUEUE_3;
+  data.Listener:= PATH_QUEUE_3;
+  data.Body:= 'Message was sent from thread 1';
+  data.SubscriptionId:= TRStompUtils.CreateGUID();
+
+  response:= node.SendWait(data);
+
+	WriteLn('Response:');
+  WriteLn(response);
+  WriteLn();
+
+  node.Disconnect();
+  node.Free;
+  Sleep(500);
+end;
+
+class procedure TThreadProc.Thread2Proc(Sender: TIdThreadComponent);
+var
+	node: TRStomp;
+  data: RDataSendWait;
+  response: String;
+begin
+  node:= TRStomp.Create(BROKER_ADDRESS, BROKER_PORT);
+  node.Login:= BROKER_USER;
+  node.Passcode:= BROKER_PASSWD;
+  node.Vhost:= BROKER_VHOST;
+
+  data.Destination:= PATH_QUEUE_3;
+  data.Listener:= PATH_QUEUE_3;
+  data.Body:= 'Message was sent from thread 2';
+  data.SubscriptionId:= TRStompUtils.CreateGUID();
+
+  response:= node.SendWait(data);
+
+	WriteLn('Response:');
+  WriteLn(response);
+  WriteLn();
+
+  node.Disconnect();
+  node.Free;
+  Sleep(1200);
+end;
 
 { TEventSub1 }
 
@@ -109,21 +181,10 @@ begin
   RecvConnectedHandler(Frame);
 end;
 
-const
-  BROKER_ADDRESS = '192.168.28.2';
-  BROKER_PORT = 61613;
-  BROKER_VHOST = '/';
-  BROKER_USER = 'dev';
-  BROKER_PASSWD = 'dev123';
-
-  PATH_TOPIC_3 = '/topic/node3';
-  PATH_QUEUE_2 = '/queue/node2';
-  PATH_QUEUE_3 = '/queue/node3';
-
 var
 	isPublishSubscribePatternTest: Boolean;
-  isWaitResponseTesting: Boolean;
-  node: TRStomp;
+  isWaitResponseTest: Boolean;
+  isMultithreadSendTest: Boolean;
 
 procedure DoPublishSubscribePatternTest();
 var
@@ -168,7 +229,7 @@ procedure DoWaitResponseTesting();
 var
   response: String;
   data: RDataSendWait;
-  node: TRStomp;
+  node, node_2: TRStomp;
 begin
   WriteLn();
   WriteLn('*********** Wait Response Test Begin ************');
@@ -178,7 +239,6 @@ begin
   node.Login:= BROKER_USER;
   node.Passcode:= BROKER_PASSWD;
   node.Vhost:= BROKER_VHOST;
-  node.Connect();
 
   data.Destination:= PATH_QUEUE_3;
   data.Listener:= PATH_QUEUE_3;
@@ -186,27 +246,72 @@ begin
   data.SubscriptionId:= TRStompUtils.CreateGUID();
 
   response:= node.SendWait(data);
+
   WriteLn('Response:');
   WriteLn(response);
+
+  node_2:= TRStomp.Create(BROKER_ADDRESS, BROKER_PORT);
+  node_2.Login:= BROKER_USER;
+  node_2.Passcode:= BROKER_PASSWD;
+  node_2.Vhost:= BROKER_VHOST;
+
+  data.Destination:= PATH_QUEUE_2;
+  data.Listener:= PATH_QUEUE_2;
+  data.Body:= 'Message Other ' + IntToStr(i+1);
+  data.SubscriptionId:= TRStompUtils.CreateGUID();
+
+  response:= node_2.SendWait(data);
+
+  WriteLn('Response:');
+  WriteLn(response);
+
+  node.Free;
+  node_2.Free;
+end;
+
+procedure DoMultithreadSendTest();
+var
+  node: TRStomp;
+  th1, th2: TIdThreadComponent;
+  data: RDataSendWait;
+begin
+  WriteLn();
+  WriteLn('*********** Multi threading reponse waiting Test Begin ************');
+  WriteLn();
+
+  th1:= TIdThreadComponent.Create(nil);
+  th1.Loop:= False;
+  th1.OnRun:= @TThreadProc.Thread1Proc;
+
+  th2:= TIdThreadComponent.Create(nil);
+  th2.Loop:= False;
+  th2.OnRun:= @TThreadProc.Thread2Proc;
+
+  th1.Start;
+  th2.Start;
 end;
 
 begin
   isPublishSubscribePatternTest:= False;
-  isWaitResponseTesting:= True;
+  isWaitResponseTest:= False;
+  isMultithreadSendTest:= True;
 
  	try
     if isPublishSubscribePatternTest then
     	DoPublishSubscribePatternTest();
 
-    if isWaitResponseTesting then
+    if isWaitResponseTest then
     begin
       i:= 0;
-      while i < 100 do
+      while i < 1 do
       begin
       	DoWaitResponseTesting();
         Inc(i);
       end;
     end;
+
+    if IsMultiThreadSendTest then
+      DoMultithreadSendTest();
 
     Readln;
   except
