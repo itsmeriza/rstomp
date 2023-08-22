@@ -36,7 +36,8 @@ unit rstomp;
 interface
 
 uses
-  Classes, SysUtils, IdTCPClient, IdThreadComponent, StrUtils;
+  Classes, windows, SysUtils, IdTCPClient, IdThreadComponent, StrUtils,
+  syncobjs;
 
 type
   TRStompCommand = (scSend, scSubscribe, scUnsubscribe, scBegin, scCommit, scAbort,
@@ -280,11 +281,19 @@ type
     class function Escape(s: string): string;
     class function Unescape(s: string): string;
     class function CreateGUID(): string;
+    class function ReplaceChars(s, replacedChars: string): string;
     class procedure Split(list: TStringList; s: string; delimiter: Char = #10);
   end;
 
   TRStompReceiveEvent = procedure(Data: string) of object;
   TRStompRecvParsedEvent = procedure(Frame: TRStompFrame) of object;
+
+  RDataSendWait = record
+    Destination: string;
+    Listener: string;
+    SubscriptionId: string;
+    Body: string;
+  end;
 
   TRStomp = class
   private
@@ -306,6 +315,7 @@ type
     fVhost: string;
     fMsg: string;
     fAckId: string;
+    fBlocking: Boolean;
 
     procedure DoThreadRunEvent(Sender: TIdThreadComponent);
     procedure DoConnectorConnected(Sender: TObject);
@@ -313,9 +323,11 @@ type
     procedure DoParseFrame(Frame: TRStompFrame; Raw: string);
     procedure DoWriteLnConsole();
     procedure DoSend(Frame: TRStompFrame);
+    procedure DoSend(Frame: TRStompFrame; var Response: string);
 
     function CmdConnect(): Boolean;
     function CmdSend(Dest, Body: string): Boolean;
+    function CmdSendWait(Destination, Listener, SubscriptionId, Body: string): string;
     function CmdSubscribe(SubscriptionId, Dest: string; AckType: TRStompAckType): Boolean;
     function CmdUnsubscribe(SubscriptionId: string): Boolean;
     function CmdDisconnect(): Boolean;
@@ -331,6 +343,8 @@ type
     function Connect(): Boolean;
     function Disconnect(): Boolean;
     function Send(Dest, Msg: string): Boolean;
+    function SendWait(Data: RDataSendwait): string;
+    function SendWait(Destination, Listener, SubscriptionId, Msg: string): string;
     function Subscribe(Id, Dest: string; AckType: TRStompAckType = atAuto): Boolean;
     function Unsubscribe(Id: string): Boolean;
     function BeginTx(TxId: string): Boolean;
@@ -371,7 +385,10 @@ const
   ESCAPE_CHARS = ['"', '\', #10, #13, #9, #8, #12, #255];
 
   PROTOCOL_VERSION = '1.2';
+  REQUEST_TIMEOUT = 2000;
 
+var
+  cs: TCriticalsection;
 
 implementation
 
@@ -529,6 +546,9 @@ var
   msg, cmd: String;
   frame: TRStompFrame;
 begin
+	if fBlocking then
+  	Exit;
+
   try
     try
 	    msg:= TrimLeft(fConnector.IOHandler.ReadLn(NULL));
@@ -539,7 +559,7 @@ begin
         Exit;
       end;
 
-      cmd:= Copy(msg, 1, Pos(LF, Msg)-1);
+      cmd:= Copy(msg, 1, Pos(LF, msg)-1);
 
       if Assigned(fOnRecvConnected) and AnsiSameText(cmd, COMMANDS[scConnected]) then
       begin
@@ -580,7 +600,7 @@ begin
     if frame <> nil then
     begin
       fAckId:= frame.GetAckId();
-    	frame.Free;
+    	FreeAndNil(frame);
     end;
   end;
 end;
@@ -640,6 +660,29 @@ begin
   fConnector.IOHandler.WriteLn(Frame.GetPacket());
 end;
 
+procedure TRStomp.DoSend(Frame: TRStompFrame; var Response: string);
+var
+  tick, timeout: QWord;
+  raw, cmd: String;
+begin
+  Response:= '';
+  DoSend(Frame);
+
+  // Wait the response
+  cmd:= '';
+  raw:= '';
+  tick:= GetTickCount64();
+  timeout:= 0;
+  while (cmd <> 'MESSAGE') and (timeout < REQUEST_TIMEOUT) do
+  begin
+		raw:= TrimLeft(fConnector.IOHandler.ReadLn(NULL));
+    cmd:= Copy(raw, 1, Pos(LF, raw)-1);
+    timeout:= GetTickCount64() - tick;
+  end;
+
+  Response:= raw;
+end;
+
 function TRStomp.CmdConnect: Boolean;
 var
   f: TRStompFrameConnect;
@@ -682,6 +725,40 @@ begin
     end;
   finally
     f.Free;
+  end;
+end;
+
+function TRStomp.CmdSendWait(Destination, Listener, SubscriptionId, Body: string
+  ): string;
+var
+  f: TRStompFrameSend;
+begin
+  Result:= '';
+
+  cs.Acquire;
+  try
+  	fBlocking:= True;
+  finally
+  	cs.Release;
+  end;
+
+  Subscribe(SubscriptionId, Listener);
+
+  f:= TRStompFrameSend.Create(Destination);
+  f.Body:= Body;
+  f.Receipt:= fReceipt;
+
+  try
+    DoSend(f, Result);
+  finally
+    Unsubscribe(SubscriptionId);
+  	f.Free;
+
+    try
+    	fBlocking:= False;
+    finally
+    	cs.Release;
+    end;
   end;
 end;
 
@@ -831,6 +908,7 @@ end;
 
 constructor TRStomp.Create(Host: string; Port: Word);
 begin
+  fBlocking:= False;
   fHost:= Host;
   fPort:= Port;
 
@@ -871,6 +949,17 @@ end;
 function TRStomp.Send(Dest, Msg: string): Boolean;
 begin
   Result:= CmdSend(Dest, Msg);
+end;
+
+function TRStomp.SendWait(Data: RDataSendwait): string;
+begin
+  Result:= SendWait(Data.Destination, Data.Listener, Data.SubscriptionId, Data.Body);
+end;
+
+function TRStomp.SendWait(Destination, Listener, SubscriptionId, Msg: string
+  ): string;
+begin
+  Result:= CmdSendWait(Destination, Listener, SubscriptionId, Msg);
 end;
 
 function TRStomp.Subscribe(Id, Dest: string; AckType: TRStompAckType): Boolean;
@@ -1172,15 +1261,36 @@ begin
   Result := Copy(Result, 1, Length(Result)-1);
 end;
 
-class function TRStompUtils.CreateGUID: string;
+class function TRStompUtils.CreateGUID(): string;
 var
-  code: Integer;
   guid: TGUID;
+  code: Integer;
 begin
   Result:= '';
   code:= SysUtils.CreateGUID(guid);
   if code <> 0 then
-		Result:= GUIDToString(guid).Replace('-', '');
+  	Exit;
+
+  Result:= GUIDToString(guid);
+  Result:= LowerCase(ReplaceChars(Result, '{-}'));
+end;
+
+class function TRStompUtils.ReplaceChars(s, replacedChars: string): string;
+var
+  i: Integer;
+  l: SizeInt;
+  ch: Char;
+begin
+  Result:= '';
+  l:= Length(s);
+  for i:= 0 to l - 1 do
+  begin
+    ch:= s[i+1];
+  	if Pos(ch, replacedChars) > 0 then
+    	Continue;
+
+    Result:= Result + ch;
+  end;
 end;
 
 class procedure TRStompUtils.Split(list: TStringList; s: string; delimiter: Char
@@ -1382,6 +1492,14 @@ function TRStompHeader.GetString: string;
 begin
   Result := fName + ':' + fValue + EOL;
 end;
+
+initialization
+
+cs:= TCriticalSection.Create;
+
+finalization
+
+FreeAndNil(cs);
 
 end.
 

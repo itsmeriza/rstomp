@@ -35,7 +35,6 @@ type
 
 var
   i: Integer;
-  pub1, pub2, subsc1, subsc2: TRStomp;
 
 { TEventSub1 }
 
@@ -45,9 +44,6 @@ begin
   WriteLn('<<< Subsc 1 <<< ', frame.GetPacket());
   WriteLn();
 end;
-
-var
-	ackId_1: string;
 
 class procedure TEventSub1.RecvMessageHandler(Frame: TRStompFrame);
 begin
@@ -114,80 +110,103 @@ begin
 end;
 
 const
-  PORT = 61613;
+  BROKER_ADDRESS = '192.168.28.2';
+  BROKER_PORT = 61613;
+  BROKER_VHOST = '/';
+  BROKER_USER = 'dev';
+  BROKER_PASSWD = 'dev123';
+
+  PATH_TOPIC_3 = '/topic/node3';
+  PATH_QUEUE_2 = '/queue/node2';
+  PATH_QUEUE_3 = '/queue/node3';
+
+var
+	isPublishSubscribePatternTest: Boolean;
+  isWaitResponseTesting: Boolean;
+  node: TRStomp;
+
+procedure DoPublishSubscribePatternTest();
+var
+  node_1, node_2, node_3: TRStomp;
+begin
+  WriteLn();
+  WriteLn('*********** Publish/Subscrive Pattern Test Begin ************');
+  WriteLn();
+
+  node_1:= TRStomp.Create(BROKER_ADDRESS, BROKER_PORT);
+  node_1.Login:= BROKER_USER;
+  node_1.Passcode:= BROKER_PASSWD;
+  node_1.Vhost:= BROKER_VHOST;
+  node_1.OnRecvMessage:= @TEvent.RecvMessageHandler;
+  node_1.Connect();
+
+  node_2:= TRStomp.Create(BROKER_ADDRESS, BROKER_PORT);
+  node_2.Login:= BROKER_USER;
+  node_2.Passcode:= BROKER_PASSWD;
+  node_2.Vhost:= BROKER_VHOST;
+  node_2.OnRecvMessage:= @TEvent.RecvMessageHandler;
+  node_2.Connect();
+
+  node_3:= TRStomp.Create(BROKER_ADDRESS, BROKER_PORT);
+  node_3.Login:= BROKER_USER;
+  node_3.Passcode:= BROKER_PASSWD;
+  node_3.Vhost:= BROKER_VHOST;
+  node_3.OnRecvMessage:= @TEvent.RecvMessageHandler;
+  node_3.Connect();
+
+  // node_1, node_2, node_3 subcribe node_3
+  node_1.Subscribe('sub-node-1', PATH_TOPIC_3);
+  node_2.Subscribe('sub-node-2', PATH_TOPIC_3);
+  node_2.Subscribe('sub-node-3', PATH_TOPIC_3);
+
+  // node_3 broadcats a message through the PATH_TOPIC_3
+  Sleep(2000);
+  node_3.Send(PATH_TOPIC_3, 'This message sent by node_3.');
+end;
+
+procedure DoWaitResponseTesting();
+var
+  response: String;
+  data: RDataSendWait;
+  node: TRStomp;
+begin
+  WriteLn();
+  WriteLn('*********** Wait Response Test Begin ************');
+  WriteLn();
+
+  node:= TRStomp.Create(BROKER_ADDRESS, BROKER_PORT);
+  node.Login:= BROKER_USER;
+  node.Passcode:= BROKER_PASSWD;
+  node.Vhost:= BROKER_VHOST;
+  node.Connect();
+
+  data.Destination:= PATH_QUEUE_3;
+  data.Listener:= PATH_QUEUE_3;
+  data.Body:= 'Message ' + IntToStr(i+1);
+  data.SubscriptionId:= TRStompUtils.CreateGUID();
+
+  response:= node.SendWait(data);
+  WriteLn('Response:');
+  WriteLn(response);
+end;
 
 begin
- try
-    WriteLn('*** Test publish/subscribe pattern *******************************');
-    pub1:= TRStomp.Create('192.168.28.2', PORT);
-    pub1.Login:= 'dev';
-    pub1.Passcode:= 'dev123';
-    pub1.Vhost:= '/';
-    pub1.Connect();
+  isPublishSubscribePatternTest:= False;
+  isWaitResponseTesting:= True;
 
-    pub2:= TRStomp.Create('192.168.28.2', PORT);
-    pub2.Login:= 'dev';
-    pub2.Passcode:= 'dev123';
-    pub2.Vhost:= '/';
-    pub2.Connect();
+ 	try
+    if isPublishSubscribePatternTest then
+    	DoPublishSubscribePatternTest();
 
-    subsc1:= TRStomp.Create('192.168.28.2', PORT);
-    subsc1.Login:= 'dev';
-    subsc1.Passcode:= 'dev123';
-    subsc1.Vhost:= '/';
-    subsc1.OnRecvConnected:= @TEventSub1.RecvConnectedHandler;
-    subsc1.OnRecvMessage:= @TEventSub1.RecvMessageHandler;
-    subsc1.OnRecvReceipt:= @TEventSub1.RecvReceiptHandler;
-    subsc1.OnRecvError:= @TEventSub1.RecvErrorHandler;
-    subsc1.Connect();
-
-    subsc2:= TRStomp.Create('192.168.28.2', PORT);
-    subsc2.Login:= 'dev';
-    subsc2.Passcode:= 'dev123';
-    subsc2.Vhost:= '/';
-    subsc2.OnRecvConnected:= @TEventSub2.RecvConnectedHandler;
-    subsc2.OnRecvMessage:= @TEventSub2.RecvMessageHandler;
-    subsc2.OnRecvReceipt:= @TEventSub2.RecvReceiptHandler;
-    subsc2.OnRecvError:= @TEventSub2.RecvErrorHandler;
-    subsc2.Connect();
-
-    subsc1.Subscribe('sub-1', '/topic/sub1');
-    subsc2.Subscribe('sub-2', '/topic/sub1');
-
-    Sleep(2000);
-    pub1.Send('/topic/sub1', 'HELLO');
-    //pub1.Send('/topic/sub2', 'HELLO');
-
-
-    Sleep(2000);
-    WriteLn;
-    WriteLn('*********** Queue Testing ***********');
-    WriteLn;
-
-    subsc1.Subscribe('sub-1-q', '/queue/sub1', TRStompAckType.atClient);
-
-    Sleep(2000);
-    pub1.Send('/queue/sub1', 'astalavista!');
-
-    Sleep(2000);
-    subsc1.Ack();
-
-    //subsc1.Subscribe('sub-1', '/topic/pub');
-    //subsc1.Subscribe('sub-2', '/topic/pub-2');
-    //subsc2.Subscribe('sub-2', '/topic/pub');
-
-    //Sleep(2000);
-    //WriteLn('Publisher 1 send 1 message.');
-    //pub1.Send('/topic/pub', 'this is first message.');
-    //WriteLn('Publisher 1 send 1 message.');
-    //pub1.Send('/topic/pub', 'this is second message.');
-    //WriteLn('Publisher 1 send 1 message.');
-    //pub1.Send('/topic/pub', 'this is third message.');
-    //
-    //
-    //
-    //WriteLn('Publisher 2 send 1 message.');
-    //subsc1.Send('/topic/pub-2', 'this is first message sent by published 2.');
+    if isWaitResponseTesting then
+    begin
+      i:= 0;
+      while i < 100 do
+      begin
+      	DoWaitResponseTesting();
+        Inc(i);
+      end;
+    end;
 
     Readln;
   except
