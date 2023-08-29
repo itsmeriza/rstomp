@@ -8,9 +8,8 @@
       <Unit>
         <Filename Value="test.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="188"/>
-        <CursorPos Y="275"/>
+        <TopLine Value="88"/>
+        <CursorPos X="34" Y="108"/>
         <FoldState Value=" T3lG0b1Q"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
@@ -19,47 +18,50 @@
         <Filename Value="rstomp.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="584"/>
-        <CursorPos Y="594"/>
+        <TopLine Value="593"/>
+        <CursorPos Y="606"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="C:\fpcupdeluxe\fpcupdeluxe\lazarus\components\Indy10_5518\Lib\Core\IdThreadComponent.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="602"/>
-        <CursorPos Y="616"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="282"/>
+        <CursorPos Y="296"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="C:\fpcupdeluxe\fpcupdeluxe\lazarus\components\Indy10_5518\Lib\System\IdStack.pas"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="920"/>
         <CursorPos Y="933"/>
-        <UsageCount Value="31"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit>
       <Unit>
         <Filename Value="C:\fpcupdeluxe\fpcupdeluxe\lazarus\components\Indy10_5518\Lib\Core\IdIOHandler.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1275"/>
-        <CursorPos X="46" Y="2196"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="2185"/>
+        <CursorPos Y="2198"/>
         <UsageCount Value="97"/>
+        <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="C:\fpcupdeluxe\fpcupdeluxe\lazarus\components\Indy10_5518\Lib\Core\IdTCPClient.pas"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="261"/>
         <CursorPos Y="275"/>
-        <UsageCount Value="17"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="18"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit>
       <Unit>
         <Filename Value="C:\fpcupdeluxe\fpcupdeluxe\fpcsrc\rtl\win\wininc\struct.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="5491"/>
         <CursorPos X="6" Y="5505"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="C:\fpcupdeluxe\fpcupdeluxe\fpcsrc\rtl\objpas\sysutils\sysutilh.inc"/>
@@ -67,91 +69,58 @@
         <CursorPos X="10" Y="29"/>
         <UsageCount Value="9"/>
       </Unit>
+      <Unit>
+        <Filename Value="C:\fpcupdeluxe\fpcupdeluxe\lazarus\components\Indy10_5518\Lib\Core\IdThread.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="413"/>
+        <CursorPos Y="425"/>
+        <UsageCount Value="10"/>
+      </Unit>
     </Units>
-    <JumpHistory HistoryIndex="27">
+    <JumpHistory HistoryIndex="29">
       <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="344" Column="14" TopLine="330"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="952" Column="3" TopLine="949"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="333" Column="14" TopLine="321"/>
+        <Filename Value="test.lpr"/>
+        <Caret Line="280" TopLine="186"/>
       </Position>
       <Position>
         <Filename Value="test.lpr"/>
-        <Caret Line="106" Column="24" TopLine="90"/>
+        <Caret Line="281" TopLine="186"/>
       </Position>
       <Position>
         <Filename Value="test.lpr"/>
-        <Caret Line="80" Column="19" TopLine="66"/>
+        <Caret Line="282" TopLine="186"/>
       </Position>
       <Position>
         <Filename Value="test.lpr"/>
-        <Caret Line="79" TopLine="67"/>
+        <Caret Line="284" TopLine="186"/>
       </Position>
       <Position>
         <Filename Value="test.lpr"/>
-        <Caret Line="80" TopLine="67"/>
+        <Caret Line="285" TopLine="186"/>
       </Position>
       <Position>
         <Filename Value="test.lpr"/>
-        <Caret Line="79" TopLine="67"/>
+        <Caret Line="286" TopLine="186"/>
       </Position>
       <Position>
         <Filename Value="test.lpr"/>
-        <Caret Line="81" TopLine="67"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="597" TopLine="584"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="591" TopLine="584"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="593" TopLine="584"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="594" TopLine="584"/>
+        <Caret Line="288" TopLine="186"/>
       </Position>
       <Position>
         <Filename Value="test.lpr"/>
-        <Caret Line="107" Column="19" TopLine="63"/>
+        <Caret Line="289" TopLine="187"/>
       </Position>
       <Position>
         <Filename Value="test.lpr"/>
-        <Caret Line="79" TopLine="64"/>
+        <Caret Line="290" TopLine="188"/>
       </Position>
       <Position>
         <Filename Value="test.lpr"/>
-        <Caret Line="291" Column="41" TopLine="279"/>
+        <Caret Line="314" TopLine="295"/>
       </Position>
       <Position>
         <Filename Value="test.lpr"/>
-        <Caret Line="19" Column="26"/>
-      </Position>
-      <Position>
-        <Filename Value="test.lpr"/>
-        <Caret Line="63" Column="3" TopLine="57"/>
-      </Position>
-      <Position>
-        <Filename Value="test.lpr"/>
-        <Caret Line="19" Column="21" TopLine="290"/>
-      </Position>
-      <Position>
-        <Filename Value="test.lpr"/>
-        <Caret Line="106" Column="19" TopLine="95"/>
-      </Position>
-      <Position>
-        <Filename Value="test.lpr"/>
-        <Caret Line="286" Column="94" TopLine="271"/>
+        <Caret Line="272" Column="11" TopLine="228"/>
       </Position>
       <Position>
         <Filename Value="test.lpr"/>
@@ -159,27 +128,75 @@
       </Position>
       <Position>
         <Filename Value="test.lpr"/>
-        <Caret Line="79" TopLine="61"/>
+        <Caret Line="63" Column="3" TopLine="57"/>
       </Position>
       <Position>
         <Filename Value="test.lpr"/>
-        <Caret Line="80" TopLine="61"/>
+        <Caret Line="20" Column="21" TopLine="5"/>
       </Position>
       <Position>
         <Filename Value="test.lpr"/>
-        <Caret Line="72" Column="36" TopLine="61"/>
+        <Caret Line="90" Column="3" TopLine="84"/>
       </Position>
       <Position>
         <Filename Value="test.lpr"/>
-        <Caret Line="79" TopLine="61"/>
+        <Caret Line="19" Column="21" TopLine="6"/>
       </Position>
       <Position>
         <Filename Value="test.lpr"/>
-        <Caret Line="80" Column="14" TopLine="70"/>
+        <Caret Line="79" Column="23" TopLine="57"/>
       </Position>
       <Position>
         <Filename Value="test.lpr"/>
-        <Caret Line="291" Column="11" TopLine="188"/>
+        <Caret Line="20" Column="21" TopLine="5"/>
+      </Position>
+      <Position>
+        <Filename Value="test.lpr"/>
+        <Caret Line="106" Column="3" TopLine="84"/>
+      </Position>
+      <Position>
+        <Filename Value="test.lpr"/>
+        <Caret Line="19" Column="21" TopLine="6"/>
+      </Position>
+      <Position>
+        <Filename Value="test.lpr"/>
+        <Caret Line="79" Column="3" TopLine="57"/>
+      </Position>
+      <Position>
+        <Filename Value="test.lpr"/>
+        <Caret Line="20" Column="21" TopLine="5"/>
+      </Position>
+      <Position>
+        <Filename Value="test.lpr"/>
+        <Caret Line="90" Column="3" TopLine="84"/>
+      </Position>
+      <Position>
+        <Filename Value="test.lpr"/>
+        <Caret Line="107" Column="12" TopLine="84"/>
+      </Position>
+      <Position>
+        <Filename Value="test.lpr"/>
+        <Caret Line="19" Column="21" TopLine="6"/>
+      </Position>
+      <Position>
+        <Filename Value="test.lpr"/>
+        <Caret Line="79" Column="19" TopLine="57"/>
+      </Position>
+      <Position>
+        <Filename Value="test.lpr"/>
+        <Caret Line="63" TopLine="57"/>
+      </Position>
+      <Position>
+        <Filename Value="C:\fpcupdeluxe\fpcupdeluxe\lazarus\components\Indy10_5518\Lib\Core\IdIOHandler.pas"/>
+        <Caret Line="2198" TopLine="2185"/>
+      </Position>
+      <Position>
+        <Filename Value="test.lpr"/>
+        <Caret Line="79" TopLine="57"/>
+      </Position>
+      <Position>
+        <Filename Value="test.lpr"/>
+        <Caret Line="108" Column="34" TopLine="88"/>
       </Position>
     </JumpHistory>
     <RunParams>
