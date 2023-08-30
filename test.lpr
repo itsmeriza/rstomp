@@ -269,9 +269,10 @@ begin
   node_2.Free;
 end;
 
-procedure DoMultithreadSendTest();
 var
   th1, th2: TIdThreadComponent;
+
+procedure DoMultithreadSendTest();
 begin
   WriteLn();
   WriteLn('*********** Multi threading reponse waiting Test Begin ************');
@@ -312,6 +313,9 @@ begin
       DoMultithreadSendTest();
 
     Readln;
+
+    th1.Free;
+    th2.Free;
   except
     on E: Exception do
     begin

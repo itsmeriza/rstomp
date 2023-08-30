@@ -607,8 +607,6 @@ end;
 
 procedure TRStomp.DoConnectorConnected(Sender: TObject);
 begin
-  fThread.Active:= True;
-
   CmdConnect();
 
 	if Assigned(fOnConnected) then
@@ -918,21 +916,22 @@ begin
   fHost:= Host;
   fPort:= Port;
 
-  fThread:= TIdThreadComponent.Create(nil);
-  fThread.Loop:= True;
-  fThread.OnRun:= @DoThreadRunEvent;
-
   fConnector:= TIdTCPClient.Create(nil);
   fConnector.OnConnected:= @DoConnectorConnected;
   fConnector.OnDisconnected:= @DoConnectorDisconnected;
+
+  fThread:= TIdThreadComponent.Create(nil);
+  fThread.Loop:= False;
+  fThread.OnRun:= @DoThreadRunEvent;
+  fThread.Start();
 end;
 
 destructor TRStomp.Destroy;
 begin
-  if fThread.Active then
-  	fThread.Active:= False;
-  fThread.Free;
+  if not fThread.Stopped then
+  	fThread.Stop();
 
+  fThread.Free;
   fConnector.Free;
   inherited Destroy;
 end;
