@@ -291,6 +291,11 @@ begin
 end;
 
 begin
+  {$IFDEF DEBUG}
+   	GlobalSkipIfNoLeaks := True;
+    DeleteFile(ExtractFilePath(ParamStr(0)) + '\heaptrc.txt');
+    SetHeapTraceOutput('heaptrc.txt');
+  {$ENDIF}
   isPublishSubscribePatternTest:= False;
   isWaitResponseTest:= False;
   isMultithreadSendTest:= True;

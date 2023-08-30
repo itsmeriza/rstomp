@@ -8,8 +8,8 @@
       <Unit>
         <Filename Value="test.lpr"/>
         <IsPartOfProject Value="True"/>
-        <TopLine Value="57"/>
-        <CursorPos X="78" Y="78"/>
+        <TopLine Value="281"/>
+        <CursorPos X="5" Y="295"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
       </Unit>
@@ -18,8 +18,8 @@
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="912"/>
-        <CursorPos X="54" Y="932"/>
+        <TopLine Value="929"/>
+        <CursorPos X="3" Y="933"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
       </Unit>
@@ -28,17 +28,15 @@
         <EditorIndex Value="3"/>
         <TopLine Value="282"/>
         <CursorPos Y="296"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="25"/>
         <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit>
       <Unit>
         <Filename Value="C:\fpcupdeluxe\fpcupdeluxe\lazarus\components\Indy10_5518\Lib\System\IdStack.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="920"/>
         <CursorPos Y="933"/>
-        <UsageCount Value="30"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
+        <UsageCount Value="29"/>
       </Unit>
       <Unit>
         <Filename Value="C:\fpcupdeluxe\fpcupdeluxe\lazarus\components\Indy10_5518\Lib\Core\IdIOHandler.pas"/>
@@ -47,126 +45,47 @@
         <CursorPos X="70" Y="2205"/>
         <UsageCount Value="106"/>
         <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit>
       <Unit>
         <Filename Value="C:\fpcupdeluxe\fpcupdeluxe\lazarus\components\Indy10_5518\Lib\Core\IdTCPClient.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="261"/>
         <CursorPos Y="275"/>
-        <UsageCount Value="16"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
+        <UsageCount Value="15"/>
       </Unit>
       <Unit>
         <Filename Value="C:\fpcupdeluxe\fpcupdeluxe\fpcsrc\rtl\win\wininc\struct.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="5491"/>
         <CursorPos X="6" Y="5505"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit>
       <Unit>
         <Filename Value="C:\fpcupdeluxe\fpcupdeluxe\fpcsrc\rtl\objpas\sysutils\sysutilh.inc"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="10" Y="29"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="6"/>
       </Unit>
       <Unit>
         <Filename Value="C:\fpcupdeluxe\fpcupdeluxe\lazarus\components\Indy10_5518\Lib\Core\IdThread.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="413"/>
         <CursorPos Y="425"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="7"/>
       </Unit>
       <Unit>
         <Filename Value="C:\fpcupdeluxe\fpcupdeluxe\lazarus\components\Indy10_5518\Lib\System\IdBaseComponent.pas"/>
         <EditorIndex Value="2"/>
         <TopLine Value="269"/>
         <CursorPos Y="283"/>
-        <UsageCount Value="19"/>
+        <UsageCount Value="23"/>
         <Loaded Value="True"/>
       </Unit>
     </Units>
+    <OtherDefines Count="1">
+      <Define0 Value="DEBUG"/>
+    </OtherDefines>
     <JumpHistory HistoryIndex="29">
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="676" TopLine="660"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="671" Column="45" TopLine="660"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="678" TopLine="660"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="680" TopLine="660"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="683" TopLine="660"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="674" TopLine="660"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="686" TopLine="664"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="665" TopLine="659"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="687" TopLine="665"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="755" TopLine="732"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="320" Column="20" TopLine="318"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="549" TopLine="542"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="930" TopLine="911"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="321" Column="21" TopLine="314"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="1497" Column="68" TopLine="1482"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="340" Column="20" TopLine="323"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="915" Column="3" TopLine="912"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="321" Column="17" TopLine="313"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="609" Column="6" TopLine="664"/>
-      </Position>
-      <Position>
-        <Filename Value="rstomp.pas"/>
-        <Caret Line="340" Column="18" TopLine="323"/>
-      </Position>
       <Position>
         <Filename Value="rstomp.pas"/>
         <Caret Line="935" TopLine="912"/>
@@ -206,6 +125,86 @@
       <Position>
         <Filename Value="rstomp.pas"/>
         <Caret Line="340" Column="15" TopLine="323"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="330" Column="19" TopLine="310"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="761" Column="16" TopLine="742"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="555" Column="72" TopLine="540"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="597" TopLine="581"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="591" TopLine="581"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="593" TopLine="581"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="596" TopLine="581"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="597" TopLine="581"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="553" TopLine="540"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="555" Column="7" TopLine="540"/>
+      </Position>
+      <Position>
+        <Filename Value="test.lpr"/>
+        <Caret Line="293" Column="49" TopLine="275"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="528" Column="24" TopLine="513"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="1397" Column="29" TopLine="1377"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="340" Column="20" TopLine="326"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="916" Column="3" TopLine="913"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="343" Column="17" TopLine="327"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="942" Column="3" TopLine="939"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="344" Column="14" TopLine="330"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="952" Column="3" TopLine="949"/>
+      </Position>
+      <Position>
+        <Filename Value="rstomp.pas"/>
+        <Caret Line="341" Column="21" TopLine="331"/>
       </Position>
     </JumpHistory>
     <RunParams>

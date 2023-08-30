@@ -546,12 +546,12 @@ var
   msg, cmd: String;
   frame: TRStompFrame;
 begin
-	if fBlocking then
+	if fBlocking or (fConnector.IOHandler = nil) then
   	Exit;
 
   try
     try
-	    msg:= TrimLeft(fConnector.IOHandler.ReadLn(NULL));
+	  	msg:= TrimLeft(fConnector.IOHandler.ReadLn(NULL));
 
       if Assigned(fOnReceive) then
       begin
@@ -758,6 +758,7 @@ begin
     Unsubscribe(SubscriptionId);
   	f.Free;
 
+    cs.Acquire;
     try
     	fBlocking:= False;
     finally
@@ -928,6 +929,8 @@ end;
 
 destructor TRStomp.Destroy;
 begin
+  Disconnect();
+
   if not fThread.Stopped then
   	fThread.Stop();
 
