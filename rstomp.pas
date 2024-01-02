@@ -83,6 +83,7 @@ type
     function GetBody(): string;
     function GetRawFrame(): string;
     function GetHeader(HeaderName: string): TRStompHeader;
+    function GetHeaderValue(HeaderName: string): string;
     function GetAckId(): string;
 		procedure SetRawFrame(Value: string);
     procedure AddHeader(Name, Value: string); overload;
@@ -1452,6 +1453,18 @@ begin
       Exit;
     end;
   end;
+end;
+
+function TRStompFrame.GetHeaderValue(HeaderName: string): string;
+var
+  h: TRStompHeader;
+begin
+  Result:= '';
+  h:= GetHeader(HeaderName);
+	if h = nil then
+  	Exit;
+
+  Result:= h.Value;
 end;
 
 function TRStompFrame.GetAckId: string;
